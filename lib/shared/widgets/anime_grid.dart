@@ -63,6 +63,22 @@ class PagedAnimeSliverGrid extends StatelessWidget {
             child: ErrorView(error: error, onRetry: controller.retry),
           );
         }
+        if (items.isEmpty && controller.hasLoaded && controller.hasMore) {
+          // Several pages in a row had nothing to show (e.g. very narrow
+          // filters); let the user decide whether to keep looking.
+          return SliverFillRemaining(
+            hasScrollBody: false,
+            child: EmptyView(
+              icon: Icons.search_off_rounded,
+              title: 'No matches yet',
+              message: 'Nothing matched in the results checked so far.',
+              action: FilledButton.tonal(
+                onPressed: controller.loadMore,
+                child: const Text('Keep looking'),
+              ),
+            ),
+          );
+        }
         if (controller.isEmpty) {
           return SliverFillRemaining(
             hasScrollBody: false,

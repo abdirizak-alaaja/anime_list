@@ -15,10 +15,20 @@ typedef PageFetcher<T> = Future<Paginated<T>> Function(
 ///   on seasonal endpoints).
 /// - Discards responses that arrive after a [reset] or [refresh].
 class PagedListController<T> extends ChangeNotifier {
-  PagedListController({required this.fetchPage, required this.idOf});
+  PagedListController({
+    required PageFetcher<T> fetchPage,
+    required this.idOf,
+    Comparator<T>? sortBy,
+  }) : _fetcher = fetchPage,
+       _comparator = sortBy;
 
-  final PageFetcher<T> fetchPage;
+  PageFetcher<T> _fetcher;
+  Comparator<T>? _comparator;
   final Object Function(T item) idOf;
+
+  /// How many consecutive pages without new items are skipped over
+  /// automatically before waiting for the user.
+  static const _maxEmptyPagesSkipped = 3;
 
   List<T> _items = const [];
   final Set<Object> _ids = {};
@@ -43,7 +53,11 @@ class PagedListController<T> extends ChangeNotifier {
 
   bool get isInitialLoading => _isLoading && _items.isEmpty;
   bool get isLoadingMore => _isLoading && _items.isNotEmpty;
-  bool get isEmpty => _page > 0 && _items.isEmpty && _error == null;
+  bool get hasLoaded => _page > 0;
+
+  /// Loaded, and there is definitely nothing to show.
+  bool get isEmpty =>
+      _page > 0 && _items.isEmpty && !_hasMore && _error == null;
 
   /// Loads the first page if nothing has been loaded yet.
   Future<void> loadInitial() async {
@@ -74,6 +88,15 @@ class PagedListController<T> extends ChangeNotifier {
     return _error;
   }
 
+  /// Switches to a different data source (e.g. a new search) and resets.
+  ///
+  /// [sortBy], when set, keeps the accumulated items sorted client-side.
+  void reconfigure({required PageFetcher<T> fetchPage, Comparator<T>? sortBy}) {
+    _fetcher = fetchPage;
+    _comparator = sortBy;
+    reset();
+  }
+
   /// Clears everything and cancels in-flight loads.
   void reset() {
     _generation++;
@@ -87,21 +110,30 @@ class PagedListController<T> extends ChangeNotifier {
     _notify();
   }
 
-  Future<void> _load(int page, {bool forceRefresh = false}) async {
+  Future<void> _load(
+    int page, {
+    bool forceRefresh = false,
+    int emptyPagesSkipped = 0,
+  }) async {
     final generation = _generation;
+    var addedItems = 0;
     _isLoading = true;
     _error = null;
     _notify();
 
     try {
-      final result = await fetchPage(page, forceRefresh: forceRefresh);
+      final result = await _fetcher(page, forceRefresh: forceRefresh);
       if (_disposed || generation != _generation) return;
 
       final next = page == 1 ? <T>[] : [..._items];
       if (page == 1) _ids.clear();
       for (final item in result.items) {
-        if (_ids.add(idOf(item))) next.add(item);
+        if (_ids.add(idOf(item))) {
+          next.add(item);
+          addedItems++;
+        }
       }
+      if (_comparator case final sortBy?) next.sort(sortBy);
       _items = List.unmodifiable(next);
       _page = page;
       _hasMore = result.hasNextPage;
@@ -114,6 +146,18 @@ class PagedListController<T> extends ChangeNotifier {
         _isLoading = false;
         _notify();
       }
+    }
+
+    // A page can legitimately contain nothing new (duplicates, or entries
+    // removed by client-side filters). Keep going a little so the user isn't
+    // left looking at an empty list while more results exist.
+    final stale = _disposed || generation != _generation;
+    if (!stale &&
+        _error == null &&
+        addedItems == 0 &&
+        _hasMore &&
+        emptyPagesSkipped < _maxEmptyPagesSkipped) {
+      await _load(_page + 1, emptyPagesSkipped: emptyPagesSkipped + 1);
     }
   }
 
