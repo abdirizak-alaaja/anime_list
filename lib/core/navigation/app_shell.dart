@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../features/home/screens/home_screen.dart';
 import '../../shared/widgets/message_view.dart';
 import '../../shared/widgets/theme_mode_button.dart';
 import '../constants/app_constants.dart';
@@ -24,7 +25,7 @@ final List<ShellDestination> _destinations = [
     label: 'Discover',
     icon: Icons.explore_outlined,
     selectedIcon: Icons.explore,
-    builder: (_) => const _PlaceholderTab(title: 'Discover'),
+    builder: (_) => const HomeScreen(),
   ),
   ShellDestination(
     label: 'Search',

@@ -1,0 +1,129 @@
+import 'package:flutter/foundation.dart';
+
+import '../../shared/models/paginated.dart';
+import '../errors/app_exception.dart';
+
+typedef PageFetcher<T> = Future<Paginated<T>> Function(
+  int page, {
+  bool forceRefresh,
+});
+
+/// Drives an infinitely scrolling, paginated list.
+///
+/// - Ignores duplicate load requests while one is running.
+/// - Drops duplicate items across pages (Jikan occasionally repeats entries
+///   on seasonal endpoints).
+/// - Discards responses that arrive after a [reset] or [refresh].
+class PagedListController<T> extends ChangeNotifier {
+  PagedListController({required this.fetchPage, required this.idOf});
+
+  final PageFetcher<T> fetchPage;
+  final Object Function(T item) idOf;
+
+  List<T> _items = const [];
+  final Set<Object> _ids = {};
+  int _page = 0;
+  bool _hasMore = true;
+  bool _isLoading = false;
+  int? _totalItems;
+  AppException? _error;
+  int _generation = 0;
+  bool _disposed = false;
+
+  List<T> get items => _items;
+  bool get hasMore => _hasMore;
+  bool get isLoading => _isLoading;
+  int? get totalItems => _totalItems;
+
+  /// The error from the most recent load, if it failed.
+  AppException? get error => _error;
+
+  /// Nothing has been loaded yet (or the list was reset).
+  bool get isPristine => _page == 0 && !_isLoading && _error == null;
+
+  bool get isInitialLoading => _isLoading && _items.isEmpty;
+  bool get isLoadingMore => _isLoading && _items.isNotEmpty;
+  bool get isEmpty => _page > 0 && _items.isEmpty && _error == null;
+
+  /// Loads the first page if nothing has been loaded yet.
+  Future<void> loadInitial() async {
+    if (_page > 0 || _isLoading) return;
+    await _load(1);
+  }
+
+  /// Loads the next page, unless loading, exhausted or in an error state.
+  Future<void> loadMore() async {
+    if (_isLoading || !_hasMore || _error != null || _page == 0) return;
+    await _load(_page + 1);
+  }
+
+  /// Retries whichever load last failed.
+  Future<void> retry() async {
+    if (_isLoading) return;
+    _error = null;
+    await _load(_page + 1);
+  }
+
+  /// Reloads from the first page, bypassing caches. Current items stay
+  /// visible until the new page arrives.
+  ///
+  /// Returns the error if the refresh failed.
+  Future<AppException?> refresh() async {
+    _generation++;
+    await _load(1, forceRefresh: true);
+    return _error;
+  }
+
+  /// Clears everything and cancels in-flight loads.
+  void reset() {
+    _generation++;
+    _items = const [];
+    _ids.clear();
+    _page = 0;
+    _hasMore = true;
+    _isLoading = false;
+    _totalItems = null;
+    _error = null;
+    _notify();
+  }
+
+  Future<void> _load(int page, {bool forceRefresh = false}) async {
+    final generation = _generation;
+    _isLoading = true;
+    _error = null;
+    _notify();
+
+    try {
+      final result = await fetchPage(page, forceRefresh: forceRefresh);
+      if (_disposed || generation != _generation) return;
+
+      final next = page == 1 ? <T>[] : [..._items];
+      if (page == 1) _ids.clear();
+      for (final item in result.items) {
+        if (_ids.add(idOf(item))) next.add(item);
+      }
+      _items = List.unmodifiable(next);
+      _page = page;
+      _hasMore = result.hasNextPage;
+      _totalItems = result.totalItems;
+    } catch (error) {
+      if (_disposed || generation != _generation) return;
+      _error = AppException.from(error);
+    } finally {
+      if (!_disposed && generation == _generation) {
+        _isLoading = false;
+        _notify();
+      }
+    }
+  }
+
+  void _notify() {
+    if (!_disposed) notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _disposed = true;
+    super.dispose();
+  }
+}
