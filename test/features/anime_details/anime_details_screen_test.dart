@@ -57,4 +57,31 @@ void main() {
     expect(find.text('Not found'), findsOneWidget);
     expect(find.byType(CircularProgressIndicator), findsNothing);
   });
+
+  testWidgets('adds the anime to the library and tracks progress', (
+    tester,
+  ) async {
+    final deps = testDependencies(
+      handler: (uri) => uri.path.endsWith('/full')
+          ? fixture('anime_full.json')
+          : {'data': []},
+    );
+    await tester.pumpWidget(
+      testApp(deps, const AnimeDetailsScreen(malId: 52991)),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Add to My List'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Watching'));
+    await tester.pumpAndSettle();
+
+    expect(deps.library.entryFor(52991)?.status.label, 'Watching');
+    expect(find.text('0 / 28'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Add an episode'));
+    await tester.pumpAndSettle();
+    expect(find.text('1 / 28'), findsOneWidget);
+    expect(deps.library.entryFor(52991)?.episodesWatched, 1);
+  });
 }

@@ -7,6 +7,7 @@ import '../../../shared/models/anime.dart';
 import '../../../shared/widgets/expandable_text.dart';
 import '../../../shared/widgets/message_view.dart';
 import '../../../shared/widgets/section_header.dart';
+import '../../library/widgets/library_panel.dart';
 import '../controllers/anime_details_controller.dart';
 import '../repositories/anime_details_repository.dart';
 import '../widgets/details_header.dart';
@@ -31,11 +32,24 @@ class _AnimeDetailsScreenState extends State<AnimeDetailsScreen> {
   @override
   void initState() {
     super.initState();
+    final deps = AppScope.of(context);
     _controller = AnimeDetailsController(
       malId: widget.malId,
       preview: widget.preview,
-      detailsRepository: AnimeDetailsRepository(AppScope.of(context).jikan),
-    )..load();
+      detailsRepository: AnimeDetailsRepository(deps.jikan),
+    );
+    _load();
+  }
+
+  /// Loads details and refreshes the saved copy in the library, if any, so
+  /// it stays accurate offline (e.g. a newly announced episode count).
+  Future<void> _load({bool forceRefresh = false}) async {
+    final library = AppScope.of(context).library;
+    await _controller.load(forceRefresh: forceRefresh);
+    final anime = _controller.anime;
+    if (_controller.hasFullDetails && anime != null) {
+      await library.syncMetadata(anime);
+    }
   }
 
   @override
@@ -56,7 +70,7 @@ class _AnimeDetailsScreenState extends State<AnimeDetailsScreen> {
           return Scaffold(
             appBar: AppBar(),
             body: error != null
-                ? ErrorView(error: error, onRetry: _controller.load)
+                ? ErrorView(error: error, onRetry: _load)
                 : const Center(child: CircularProgressIndicator()),
           );
         }
@@ -70,8 +84,12 @@ class _AnimeDetailsScreenState extends State<AnimeDetailsScreen> {
           ),
           body: RefreshIndicator(
             edgeOffset: MediaQuery.paddingOf(context).top + kToolbarHeight,
-            onRefresh: () => _controller.load(forceRefresh: true),
-            child: _DetailsBody(controller: _controller, anime: anime),
+            onRefresh: () => _load(forceRefresh: true),
+            child: _DetailsBody(
+              controller: _controller,
+              anime: anime,
+              onRetry: _load,
+            ),
           ),
         );
       },
@@ -98,10 +116,15 @@ class _AppBarScrim extends StatelessWidget {
 }
 
 class _DetailsBody extends StatelessWidget {
-  const _DetailsBody({required this.controller, required this.anime});
+  const _DetailsBody({
+    required this.controller,
+    required this.anime,
+    required this.onRetry,
+  });
 
   final AnimeDetailsController controller;
   final Anime anime;
+  final VoidCallback onRetry;
 
   @override
   Widget build(BuildContext context) {
@@ -127,12 +150,14 @@ class _DetailsBody extends StatelessWidget {
               Insets.lg,
               0,
             ),
-            child: _InlineError(
-              message: error.message,
-              onRetry: controller.load,
-            ),
+            child: _InlineError(message: error.message, onRetry: onRetry),
           ),
         const SizedBox(height: Insets.lg),
+        Padding(
+          padding: padding,
+          child: LibraryPanel(anime: anime),
+        ),
+        const SizedBox(height: Insets.md),
         Padding(
           padding: padding,
           child: StatsRow(anime: anime),
