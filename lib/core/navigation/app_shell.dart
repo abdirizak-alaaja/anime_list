@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../features/favorites/screens/favorites_screen.dart';
 import '../../features/home/screens/home_screen.dart';
+import '../../features/library/screens/my_list_screen.dart';
 import '../../features/search/screens/search_screen.dart';
-import '../../shared/widgets/message_view.dart';
-import '../../shared/widgets/theme_mode_button.dart';
 import '../constants/app_constants.dart';
 
 /// A top-level tab of the app.
@@ -39,7 +38,7 @@ final List<ShellDestination> _destinations = [
     label: 'My List',
     icon: Icons.video_library_outlined,
     selectedIcon: Icons.video_library,
-    builder: (_) => const _PlaceholderTab(title: 'My List'),
+    builder: (_) => const MyListScreen(),
   ),
   ShellDestination(
     label: 'Favorites',
@@ -125,23 +124,6 @@ class _AppShellState extends State<AppShell> {
               label: d.label,
             ),
         ],
-      ),
-    );
-  }
-}
-
-class _PlaceholderTab extends StatelessWidget {
-  const _PlaceholderTab({required this.title});
-
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(title), actions: const [ThemeModeButton()]),
-      body: const EmptyView(
-        icon: Icons.construction_rounded,
-        title: 'Coming soon',
       ),
     );
   }

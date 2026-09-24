@@ -65,6 +65,9 @@ class LibraryRepository extends ChangeNotifier {
     await _persist();
   }
 
+  /// Re-inserts a previously removed entry unchanged (undo).
+  Future<void> restore(LibraryEntry entry) => _put(entry);
+
   Future<void> setStatus(int malId, WatchStatus status) async {
     final entry = _entries[malId];
     if (entry == null || entry.status == status) return;
