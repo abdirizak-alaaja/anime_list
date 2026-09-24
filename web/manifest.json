@@ -1,11 +1,11 @@
 {
-    "name": "anime_list",
-    "short_name": "anime_list",
+    "name": "AniShelf",
+    "short_name": "AniShelf",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "Discover anime and track your personal anime list.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

@@ -4,6 +4,7 @@ import '../../../core/constants/app_constants.dart';
 import '../../../core/di/app_scope.dart';
 import '../../../core/navigation/app_router.dart';
 import '../../../shared/widgets/message_view.dart';
+import '../../../shared/widgets/poster_hero.dart';
 import '../../../shared/widgets/theme_mode_button.dart';
 import '../models/library_entry.dart';
 import '../models/library_sort.dart';
@@ -140,6 +141,11 @@ class _StatusList extends StatelessWidget {
       separatorBuilder: (_, _) => const SizedBox(height: Insets.sm),
       itemBuilder: (context, index) {
         final entry = entries[index];
+        // Unique per tab: an entry appears under "All" and its status.
+        final heroTag = posterHeroTag(
+          'my-list-${status?.name ?? 'all'}',
+          entry.malId,
+        );
         return Dismissible(
           key: ValueKey(entry.malId),
           direction: DismissDirection.endToStart,
@@ -151,7 +157,9 @@ class _StatusList extends StatelessWidget {
               context,
               malId: entry.malId,
               preview: entry.anime.toAnime(),
+              heroTag: heroTag,
             ),
+            heroTag: heroTag,
             onStatusTap: () => _changeStatus(context, entry),
             onEpisodesChanged: (value) =>
                 library.setEpisodesWatched(entry.malId, value),

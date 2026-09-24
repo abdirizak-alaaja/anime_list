@@ -6,6 +6,7 @@ import '../../../shared/models/anime.dart';
 import '../../../shared/widgets/anime_card.dart';
 import '../../../shared/widgets/anime_skeletons.dart';
 import '../../../shared/widgets/message_view.dart';
+import '../../../shared/widgets/poster_hero.dart';
 import '../../../shared/widgets/section_header.dart';
 import '../../../shared/widgets/shimmer.dart';
 
@@ -17,12 +18,16 @@ class AnimeCarousel extends StatelessWidget {
     super.key,
     required this.title,
     required this.controller,
+    required this.heroScope,
     this.onAnimeTap,
     this.onSeeAll,
   });
 
   final String title;
   final PagedListController<Anime> controller;
+
+  /// Scope for poster hero tags; see [posterHeroTag].
+  final String heroScope;
   final void Function(Anime anime)? onAnimeTap;
   final VoidCallback? onSeeAll;
 
@@ -43,7 +48,14 @@ class AnimeCarousel extends StatelessWidget {
           height: height,
           child: ListenableBuilder(
             listenable: controller,
-            builder: (context, _) => _buildContent(context),
+            // Cross-fade from skeleton to content.
+            builder: (context, _) => AnimatedSwitcher(
+              duration: const Duration(milliseconds: 250),
+              child: KeyedSubtree(
+                key: ValueKey(controller.items.isEmpty),
+                child: _buildContent(context),
+              ),
+            ),
           ),
         ),
       ],
@@ -109,6 +121,7 @@ class AnimeCarousel extends StatelessWidget {
             width: _cardWidth,
             child: AnimeCard(
               anime: anime,
+              heroTag: posterHeroTag(heroScope, anime.malId),
               onTap: onAnimeTap == null ? null : () => onAnimeTap!(anime),
             ),
           );

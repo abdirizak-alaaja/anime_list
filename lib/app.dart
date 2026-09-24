@@ -25,6 +25,12 @@ class AnimeListApp extends StatelessWidget {
           theme: AppTheme.light,
           darkTheme: AppTheme.dark,
           themeMode: settings.themeMode,
+          // Honor the system text size, but cap it where fixed-height
+          // layouts (carousels, cards) would stop being usable.
+          builder: (context, child) => MediaQuery.withClampedTextScaling(
+            maxScaleFactor: 2,
+            child: child!,
+          ),
           home: const AppShell(),
         ),
       ),

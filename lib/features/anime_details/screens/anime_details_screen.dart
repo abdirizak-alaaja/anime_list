@@ -6,6 +6,7 @@ import '../../../core/navigation/app_router.dart';
 import '../../../shared/models/anime.dart';
 import '../../../shared/widgets/expandable_text.dart';
 import '../../../shared/widgets/message_view.dart';
+import '../../../shared/widgets/poster_hero.dart';
 import '../../../shared/widgets/section_header.dart';
 import '../../favorites/widgets/favorite_button.dart';
 import '../../library/widgets/library_panel.dart';
@@ -18,10 +19,18 @@ import '../widgets/stats_row.dart';
 import '../widgets/tag_list.dart';
 
 class AnimeDetailsScreen extends StatefulWidget {
-  const AnimeDetailsScreen({super.key, required this.malId, this.preview});
+  const AnimeDetailsScreen({
+    super.key,
+    required this.malId,
+    this.preview,
+    this.heroTag,
+  });
 
   final int malId;
   final Anime? preview;
+
+  /// Hero tag of the poster that was tapped, for the transition.
+  final Object? heroTag;
 
   @override
   State<AnimeDetailsScreen> createState() => _AnimeDetailsScreenState();
@@ -91,6 +100,7 @@ class _AnimeDetailsScreenState extends State<AnimeDetailsScreen> {
             child: _DetailsBody(
               controller: _controller,
               anime: anime,
+              heroTag: widget.heroTag,
               onRetry: _load,
             ),
           ),
@@ -123,10 +133,12 @@ class _DetailsBody extends StatelessWidget {
     required this.controller,
     required this.anime,
     required this.onRetry,
+    this.heroTag,
   });
 
   final AnimeDetailsController controller;
   final Anime anime;
+  final Object? heroTag;
   final VoidCallback onRetry;
 
   @override
@@ -137,9 +149,14 @@ class _DetailsBody extends StatelessWidget {
     const padding = EdgeInsets.symmetric(horizontal: Insets.lg);
 
     return ListView(
-      padding: const EdgeInsets.only(bottom: Insets.xxl),
+      padding: EdgeInsets.only(
+        bottom: Insets.xxl,
+        // Keep line lengths readable on tablets and desktop.
+        left: _sidePadding(context),
+        right: _sidePadding(context),
+      ),
       children: [
-        DetailsHeader(anime: anime),
+        DetailsHeader(anime: anime, heroTag: heroTag),
         if (controller.isLoading)
           const Padding(
             padding: EdgeInsets.fromLTRB(Insets.lg, Insets.md, Insets.lg, 0),
@@ -225,9 +242,11 @@ class _DetailsBody extends StatelessWidget {
             onRetry: controller.loadRecommendations,
             itemBuilder: (context, rec) => RecommendationTile(
               recommendation: rec,
+              heroTag: posterHeroTag('recommendations', rec.malId),
               onTap: () => AppRouter.openAnime(
                 context,
                 malId: rec.malId,
+                heroTag: posterHeroTag('recommendations', rec.malId),
                 preview: Anime(
                   malId: rec.malId,
                   title: rec.title,
@@ -241,6 +260,12 @@ class _DetailsBody extends StatelessWidget {
       ],
     );
   }
+}
+
+double _sidePadding(BuildContext context) {
+  const maxContentWidth = 900.0;
+  final width = MediaQuery.sizeOf(context).width;
+  return width > maxContentWidth ? (width - maxContentWidth) / 2 : 0;
 }
 
 class _InlineError extends StatelessWidget {

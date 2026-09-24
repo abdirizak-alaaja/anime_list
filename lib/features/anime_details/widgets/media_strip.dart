@@ -6,6 +6,7 @@ import '../../../shared/models/anime_character.dart';
 import '../../../shared/models/anime_recommendation.dart';
 import '../../../shared/widgets/anime_poster.dart';
 import '../../../shared/widgets/message_view.dart';
+import '../../../shared/widgets/poster_hero.dart';
 import '../../../shared/widgets/section_header.dart';
 import '../../../shared/widgets/shimmer.dart';
 
@@ -141,10 +142,12 @@ class RecommendationTile extends StatelessWidget {
     super.key,
     required this.recommendation,
     required this.onTap,
+    this.heroTag,
   });
 
   final AnimeRecommendation recommendation;
   final VoidCallback onTap;
+  final Object? heroTag;
 
   @override
   Widget build(BuildContext context) {
@@ -161,7 +164,10 @@ class RecommendationTile extends StatelessWidget {
           children: [
             AspectRatio(
               aspectRatio: AnimePoster.aspectRatio,
-              child: AnimePoster(imageUrl: recommendation.imageUrl),
+              child: PosterHero(
+                tag: heroTag,
+                child: AnimePoster(imageUrl: recommendation.imageUrl),
+              ),
             ),
             const SizedBox(height: Insets.xs),
             Text(

@@ -4,6 +4,7 @@ import '../../../core/constants/app_constants.dart';
 import '../../../core/di/app_scope.dart';
 import '../../../core/navigation/app_router.dart';
 import '../../../shared/models/anime.dart';
+import '../../../shared/widgets/poster_hero.dart';
 import '../../../shared/widgets/theme_mode_button.dart';
 import '../controllers/home_controller.dart';
 import '../models/discovery_section.dart';
@@ -46,7 +47,14 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  void _openAnime(Anime anime) => AppRouter.openAnimePreview(context, anime);
+  void _openAnime(Anime anime, {String? heroScope}) =>
+      AppRouter.openAnimePreview(
+        context,
+        anime,
+        heroTag: heroScope == null
+            ? null
+            : posterHeroTag(heroScope, anime.malId),
+      );
 
   void _openSection(DiscoverySection section) {
     Navigator.of(context).push(
@@ -55,7 +63,9 @@ class _HomeScreenState extends State<HomeScreen> {
           title: section.title,
           subtitle: section.description,
           controller: _controller[section],
-          onAnimeTap: _openAnime,
+          heroScope: 'all-${section.name}',
+          onAnimeTap: (anime) =>
+              _openAnime(anime, heroScope: 'all-${section.name}'),
         ),
       ),
     );
@@ -85,7 +95,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   AnimeCarousel(
                     title: section.title,
                     controller: _controller[section],
-                    onAnimeTap: _openAnime,
+                    heroScope: section.name,
+                    onAnimeTap: (anime) =>
+                        _openAnime(anime, heroScope: section.name),
                     onSeeAll: () => _openSection(section),
                   ),
                 const SizedBox(height: Insets.xl),

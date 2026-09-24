@@ -7,6 +7,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../shared/widgets/anime_card.dart';
 import '../../../shared/widgets/anime_grid.dart';
 import '../../../shared/widgets/message_view.dart';
+import '../../../shared/widgets/poster_hero.dart';
 import '../../../shared/widgets/theme_mode_button.dart';
 import '../models/favorite_entry.dart';
 import '../repositories/favorites_repository.dart';
@@ -92,7 +93,12 @@ class _FavoriteTile extends StatelessWidget {
         Positioned.fill(
           child: AnimeCard(
             anime: anime,
-            onTap: () => AppRouter.openAnimePreview(context, anime),
+            heroTag: posterHeroTag('favorites', anime.malId),
+            onTap: () => AppRouter.openAnimePreview(
+              context,
+              anime,
+              heroTag: posterHeroTag('favorites', anime.malId),
+            ),
           ),
         ),
         // Covers the card's own favorite badge with a tappable remove button.

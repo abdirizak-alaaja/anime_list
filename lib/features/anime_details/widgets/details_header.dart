@@ -4,12 +4,14 @@ import '../../../core/constants/app_constants.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../shared/models/anime.dart';
 import '../../../shared/widgets/anime_poster.dart';
+import '../../../shared/widgets/poster_hero.dart';
 
 /// Backdrop, large poster, titles and quick facts.
 class DetailsHeader extends StatelessWidget {
-  const DetailsHeader({super.key, required this.anime});
+  const DetailsHeader({super.key, required this.anime, this.heroTag});
 
   final Anime anime;
+  final Object? heroTag;
 
   @override
   Widget build(BuildContext context) {
@@ -51,17 +53,20 @@ class DetailsHeader extends StatelessWidget {
                 width: posterWidth,
                 child: AspectRatio(
                   aspectRatio: AnimePoster.aspectRatio,
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: const [
-                        BoxShadow(blurRadius: 16, color: Colors.black45),
-                      ],
-                    ),
-                    child: AnimePoster(
-                      imageUrl: anime.largeImageUrl ?? anime.imageUrl,
-                      borderRadius: 12,
-                      semanticLabel: '${anime.title} poster',
+                  child: PosterHero(
+                    tag: heroTag,
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: const [
+                          BoxShadow(blurRadius: 16, color: Colors.black45),
+                        ],
+                      ),
+                      child: AnimePoster(
+                        imageUrl: anime.largeImageUrl ?? anime.imageUrl,
+                        borderRadius: 12,
+                        semanticLabel: '${anime.title} poster',
+                      ),
                     ),
                   ),
                 ),

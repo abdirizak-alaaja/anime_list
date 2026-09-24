@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../shared/widgets/anime_poster.dart';
+import '../../../shared/widgets/poster_hero.dart';
 import '../models/library_entry.dart';
 import 'episode_stepper.dart';
 import 'status_picker.dart';
@@ -15,12 +16,14 @@ class LibraryListTile extends StatelessWidget {
     required this.onTap,
     required this.onStatusTap,
     required this.onEpisodesChanged,
+    this.heroTag,
   });
 
   final LibraryEntry entry;
   final VoidCallback onTap;
   final VoidCallback onStatusTap;
   final ValueChanged<int> onEpisodesChanged;
+  final Object? heroTag;
 
   @override
   Widget build(BuildContext context) {
@@ -44,9 +47,12 @@ class LibraryListTile extends StatelessWidget {
                   width: 64,
                   child: AspectRatio(
                     aspectRatio: AnimePoster.aspectRatio,
-                    child: AnimePoster(
-                      imageUrl: anime.imageUrl,
-                      borderRadius: 6,
+                    child: PosterHero(
+                      tag: heroTag,
+                      child: AnimePoster(
+                        imageUrl: anime.imageUrl,
+                        borderRadius: 6,
+                      ),
                     ),
                   ),
                 ),

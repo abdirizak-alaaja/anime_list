@@ -6,6 +6,7 @@ import '../../../core/navigation/app_router.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../shared/models/anime.dart';
 import '../../../shared/widgets/anime_grid.dart';
+import '../../../shared/widgets/poster_hero.dart';
 import '../controllers/anime_search_controller.dart';
 import '../data/recent_searches_store.dart';
 import '../repositories/search_repository.dart';
@@ -75,7 +76,11 @@ class _SearchScreenState extends State<SearchScreen> {
 
   void _openAnime(Anime anime) {
     _search.rememberQuery();
-    AppRouter.openAnimePreview(context, anime);
+    AppRouter.openAnimePreview(
+      context,
+      anime,
+      heroTag: posterHeroTag('search', anime.malId),
+    );
   }
 
   @override
@@ -148,6 +153,7 @@ class _SearchScreenState extends State<SearchScreen> {
           SliverToBoxAdapter(child: _ResultsHeader(search: _search)),
           PagedAnimeSliverGrid(
             controller: _search.results,
+            heroScope: 'search',
             onTap: _openAnime,
             emptyTitle: _search.query.isEmpty
                 ? 'No anime match these filters'

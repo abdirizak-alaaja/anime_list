@@ -6,6 +6,7 @@ import '../models/anime.dart';
 import 'anime_card.dart';
 import 'anime_skeletons.dart';
 import 'message_view.dart';
+import 'poster_hero.dart';
 import 'shimmer.dart';
 
 /// Grid sizing shared by every anime grid.
@@ -35,12 +36,16 @@ class PagedAnimeSliverGrid extends StatelessWidget {
     super.key,
     required this.controller,
     required this.onTap,
+    required this.heroScope,
     this.emptyTitle = 'No anime found',
     this.emptyMessage,
   });
 
   final PagedListController<Anime> controller;
   final void Function(Anime anime) onTap;
+
+  /// Scope for poster hero tags; see [posterHeroTag].
+  final String heroScope;
   final String emptyTitle;
   final String? emptyMessage;
 
@@ -107,7 +112,11 @@ class PagedAnimeSliverGrid extends StatelessWidget {
                       );
                     }
                     final anime = items[index];
-                    return AnimeCard(anime: anime, onTap: () => onTap(anime));
+                    return AnimeCard(
+                      anime: anime,
+                      heroTag: posterHeroTag(heroScope, anime.malId),
+                      onTap: () => onTap(anime),
+                    );
                   },
                 ),
               ),

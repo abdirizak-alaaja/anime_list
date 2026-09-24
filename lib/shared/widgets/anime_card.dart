@@ -6,6 +6,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/utils/formatters.dart';
 import '../models/anime.dart';
 import 'anime_poster.dart';
+import 'poster_hero.dart';
 import 'score_badge.dart';
 
 /// Poster card used in carousels and grids.
@@ -13,10 +14,13 @@ import 'score_badge.dart';
 /// Its height is [heightFor] a given width, so containers can size it
 /// exactly and nothing overflows at large text sizes.
 class AnimeCard extends StatelessWidget {
-  const AnimeCard({super.key, required this.anime, this.onTap});
+  const AnimeCard({super.key, required this.anime, this.onTap, this.heroTag});
 
   final Anime anime;
   final VoidCallback? onTap;
+
+  /// Shared with the details screen for a poster transition.
+  final Object? heroTag;
 
   static const _textBlockHeight = 78.0;
 
@@ -52,7 +56,10 @@ class AnimeCard extends StatelessWidget {
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  AnimePoster(imageUrl: anime.imageUrl),
+                  PosterHero(
+                    tag: heroTag,
+                    child: AnimePoster(imageUrl: anime.imageUrl),
+                  ),
                   Positioned(
                     left: 6,
                     top: 6,

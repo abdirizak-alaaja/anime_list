@@ -14,6 +14,7 @@ class AnimeCollectionScreen extends StatefulWidget {
     super.key,
     required this.title,
     required this.controller,
+    required this.heroScope,
     this.subtitle,
     this.onAnimeTap,
   });
@@ -21,6 +22,7 @@ class AnimeCollectionScreen extends StatefulWidget {
   final String title;
   final String? subtitle;
   final PagedListController<Anime> controller;
+  final String heroScope;
   final void Function(Anime anime)? onAnimeTap;
 
   @override
@@ -72,6 +74,7 @@ class _AnimeCollectionScreenState extends State<AnimeCollectionScreen> {
               ),
             PagedAnimeSliverGrid(
               controller: widget.controller,
+              heroScope: widget.heroScope,
               onTap: (anime) => widget.onAnimeTap?.call(anime),
             ),
           ],

@@ -11,14 +11,23 @@ abstract final class AppRouter {
     BuildContext context, {
     required int malId,
     Anime? preview,
+    Object? heroTag,
   }) {
     return Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (_) => AnimeDetailsScreen(malId: malId, preview: preview),
+        builder: (_) => AnimeDetailsScreen(
+          malId: malId,
+          preview: preview,
+          heroTag: heroTag,
+        ),
       ),
     );
   }
 
-  static Future<void> openAnimePreview(BuildContext context, Anime anime) =>
-      openAnime(context, malId: anime.malId, preview: anime);
+  static Future<void> openAnimePreview(
+    BuildContext context,
+    Anime anime, {
+    Object? heroTag,
+  }) =>
+      openAnime(context, malId: anime.malId, preview: anime, heroTag: heroTag);
 }
