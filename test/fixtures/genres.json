@@ -1,0 +1,34 @@
+{
+ "data": [
+  {
+   "mal_id": 1,
+   "name": "Action",
+   "url": "https://myanimelist.net/anime/genre/1/Action",
+   "count": 5003
+  },
+  {
+   "mal_id": 2,
+   "name": "Adventure",
+   "url": "https://myanimelist.net/anime/genre/2/Adventure",
+   "count": 4600
+  },
+  {
+   "mal_id": 5,
+   "name": "Avant Garde",
+   "url": "https://myanimelist.net/anime/genre/5/Avant_Garde",
+   "count": 1122
+  },
+  {
+   "mal_id": 46,
+   "name": "Award Winning",
+   "url": "https://myanimelist.net/anime/genre/46/Award_Winning",
+   "count": 259
+  },
+  {
+   "mal_id": 28,
+   "name": "Boys Love",
+   "url": "https://myanimelist.net/anime/genre/28/Boys_Love",
+   "count": 204
+  }
+ ]
+}
