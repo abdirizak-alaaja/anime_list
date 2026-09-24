@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/constants/app_constants.dart';
+import '../../core/di/app_scope.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/formatters.dart';
 import '../models/anime.dart';
@@ -12,16 +13,10 @@ import 'score_badge.dart';
 /// Its height is [heightFor] a given width, so containers can size it
 /// exactly and nothing overflows at large text sizes.
 class AnimeCard extends StatelessWidget {
-  const AnimeCard({
-    super.key,
-    required this.anime,
-    this.onTap,
-    this.isFavorite = false,
-  });
+  const AnimeCard({super.key, required this.anime, this.onTap});
 
   final Anime anime;
   final VoidCallback? onTap;
-  final bool isFavorite;
 
   static const _textBlockHeight = 78.0;
 
@@ -63,8 +58,11 @@ class AnimeCard extends StatelessWidget {
                     top: 6,
                     child: ScoreBadge(score: anime.score),
                   ),
-                  if (isFavorite)
-                    const Positioned(right: 6, top: 6, child: _FavoriteDot()),
+                  Positioned(
+                    right: 6,
+                    top: 6,
+                    child: _FavoriteIndicator(malId: anime.malId),
+                  ),
                   if (anime.status case final status?)
                     Positioned(
                       left: 6,
@@ -146,27 +144,38 @@ class _StatusPill extends StatelessWidget {
   }
 }
 
-class _FavoriteDot extends StatelessWidget {
-  const _FavoriteDot();
+/// Heart badge, shown only while the anime is a favorite.
+class _FavoriteIndicator extends StatelessWidget {
+  const _FavoriteIndicator({required this.malId});
+
+  final int malId;
 
   @override
   Widget build(BuildContext context) {
-    return Semantics(
-      label: 'Favorite',
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: Colors.black.withValues(alpha: 0.72),
-          shape: BoxShape.circle,
-        ),
-        child: const Padding(
-          padding: EdgeInsets.all(4),
-          child: Icon(
-            Icons.favorite_rounded,
-            size: 14,
-            color: AppColors.favorite,
+    final favorites = AppScope.of(context).favorites;
+
+    return ListenableBuilder(
+      listenable: favorites,
+      builder: (context, _) {
+        if (!favorites.isFavorite(malId)) return const SizedBox.shrink();
+        return Semantics(
+          label: 'Favorite',
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: Colors.black.withValues(alpha: 0.72),
+              shape: BoxShape.circle,
+            ),
+            child: const Padding(
+              padding: EdgeInsets.all(4),
+              child: Icon(
+                Icons.favorite_rounded,
+                size: 14,
+                color: AppColors.favorite,
+              ),
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

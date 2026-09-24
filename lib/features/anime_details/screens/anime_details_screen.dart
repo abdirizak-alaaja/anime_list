@@ -7,6 +7,7 @@ import '../../../shared/models/anime.dart';
 import '../../../shared/widgets/expandable_text.dart';
 import '../../../shared/widgets/message_view.dart';
 import '../../../shared/widgets/section_header.dart';
+import '../../favorites/widgets/favorite_button.dart';
 import '../../library/widgets/library_panel.dart';
 import '../controllers/anime_details_controller.dart';
 import '../repositories/anime_details_repository.dart';
@@ -41,14 +42,15 @@ class _AnimeDetailsScreenState extends State<AnimeDetailsScreen> {
     _load();
   }
 
-  /// Loads details and refreshes the saved copy in the library, if any, so
+  /// Loads details and refreshes saved copies in the library and favorites so
   /// it stays accurate offline (e.g. a newly announced episode count).
   Future<void> _load({bool forceRefresh = false}) async {
-    final library = AppScope.of(context).library;
+    final deps = AppScope.of(context);
     await _controller.load(forceRefresh: forceRefresh);
     final anime = _controller.anime;
     if (_controller.hasFullDetails && anime != null) {
-      await library.syncMetadata(anime);
+      await deps.library.syncMetadata(anime);
+      await deps.favorites.syncMetadata(anime);
     }
   }
 
@@ -81,6 +83,7 @@ class _AnimeDetailsScreenState extends State<AnimeDetailsScreen> {
             backgroundColor: Colors.transparent,
             foregroundColor: Colors.white,
             flexibleSpace: const _AppBarScrim(),
+            actions: [FavoriteButton(anime: anime, color: Colors.white)],
           ),
           body: RefreshIndicator(
             edgeOffset: MediaQuery.paddingOf(context).top + kToolbarHeight,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../features/favorites/screens/favorites_screen.dart';
 import '../../features/home/screens/home_screen.dart';
 import '../../features/search/screens/search_screen.dart';
 import '../../shared/widgets/message_view.dart';
@@ -44,7 +45,7 @@ final List<ShellDestination> _destinations = [
     label: 'Favorites',
     icon: Icons.favorite_outline,
     selectedIcon: Icons.favorite,
-    builder: (_) => const _PlaceholderTab(title: 'Favorites'),
+    builder: (_) => const FavoritesScreen(),
   ),
 ];
 

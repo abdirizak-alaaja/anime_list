@@ -19,14 +19,12 @@ class AnimeCarousel extends StatelessWidget {
     required this.controller,
     this.onAnimeTap,
     this.onSeeAll,
-    this.isFavorite,
   });
 
   final String title;
   final PagedListController<Anime> controller;
   final void Function(Anime anime)? onAnimeTap;
   final VoidCallback? onSeeAll;
-  final bool Function(Anime anime)? isFavorite;
 
   static const _cardWidth = 136.0;
 
@@ -111,7 +109,6 @@ class AnimeCarousel extends StatelessWidget {
             width: _cardWidth,
             child: AnimeCard(
               anime: anime,
-              isFavorite: isFavorite?.call(anime) ?? false,
               onTap: onAnimeTap == null ? null : () => onAnimeTap!(anime),
             ),
           );

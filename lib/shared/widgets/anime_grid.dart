@@ -35,14 +35,12 @@ class PagedAnimeSliverGrid extends StatelessWidget {
     super.key,
     required this.controller,
     required this.onTap,
-    this.isFavorite,
     this.emptyTitle = 'No anime found',
     this.emptyMessage,
   });
 
   final PagedListController<Anime> controller;
   final void Function(Anime anime) onTap;
-  final bool Function(Anime anime)? isFavorite;
   final String emptyTitle;
   final String? emptyMessage;
 
@@ -109,11 +107,7 @@ class PagedAnimeSliverGrid extends StatelessWidget {
                       );
                     }
                     final anime = items[index];
-                    return AnimeCard(
-                      anime: anime,
-                      isFavorite: isFavorite?.call(anime) ?? false,
-                      onTap: () => onTap(anime),
-                    );
+                    return AnimeCard(anime: anime, onTap: () => onTap(anime));
                   },
                 ),
               ),
