@@ -10,14 +10,10 @@ class RateLimit {
 
 /// Serializes callers so that no configured [RateLimit] is exceeded.
 ///
-/// Jikan allows 3 requests/second and 60 requests/minute; the defaults stay
-/// slightly under both to leave headroom for clock drift.
+/// See [publicJikanLimits] and [selfHostedLimits].
 class RateLimiter {
   RateLimiter({
-    this.limits = const [
-      RateLimit(3, Duration(milliseconds: 1200)),
-      RateLimit(55, Duration(minutes: 1)),
-    ],
+    this.limits = publicJikanLimits,
     DateTime Function()? now,
     Future<void> Function(Duration)? delay,
   }) : _now = now ?? DateTime.now,
@@ -25,6 +21,16 @@ class RateLimiter {
        _longestWindow = limits
            .map((l) => l.window)
            .fold(Duration.zero, (a, b) => a > b ? a : b);
+
+  /// api.jikan.moe: 3 requests/second and 60/minute, with headroom.
+  static const publicJikanLimits = [
+    RateLimit(3, Duration(milliseconds: 1200)),
+    RateLimit(55, Duration(minutes: 1)),
+  ];
+
+  /// A self-hosted Jikan has no API rate limit, but it scrapes MyAnimeList
+  /// on cache misses, and MyAnimeList may block IPs that request too fast.
+  static const selfHostedLimits = [RateLimit(10, Duration(seconds: 1))];
 
   final List<RateLimit> limits;
   final DateTime Function() _now;

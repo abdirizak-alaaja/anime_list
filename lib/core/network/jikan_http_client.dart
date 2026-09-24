@@ -34,7 +34,13 @@ class JikanHttpClient {
     Future<void> Function(Duration)? delay,
   }) : _http = httpClient ?? http.Client(),
        _baseUri = Uri.parse(baseUrl),
-       _rateLimiter = rateLimiter ?? RateLimiter(),
+       _rateLimiter =
+           rateLimiter ??
+           RateLimiter(
+             limits: AppConstants.usesPublicJikan
+                 ? RateLimiter.publicJikanLimits
+                 : RateLimiter.selfHostedLimits,
+           ),
        _cache = cache ?? MemoryResponseCache(),
        _delay = delay ?? Future<void>.delayed;
 
