@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/constants/app_constants.dart';
 import '../../../core/di/app_scope.dart';
+import '../../../core/navigation/app_router.dart';
 import '../../../shared/models/anime.dart';
 import '../../../shared/widgets/theme_mode_button.dart';
 import '../controllers/home_controller.dart';
@@ -45,9 +46,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  void _openAnime(Anime anime) {
-    // Wired up once the details screen exists.
-  }
+  void _openAnime(Anime anime) => AppRouter.openAnimePreview(context, anime);
 
   void _openSection(DiscoverySection section) {
     Navigator.of(context).push(

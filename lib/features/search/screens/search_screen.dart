@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/constants/app_constants.dart';
 import '../../../core/di/app_scope.dart';
+import '../../../core/navigation/app_router.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../shared/models/anime.dart';
 import '../../../shared/widgets/anime_grid.dart';
@@ -74,7 +75,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
   void _openAnime(Anime anime) {
     _search.rememberQuery();
-    // Navigation to details is wired up with the details screen.
+    AppRouter.openAnimePreview(context, anime);
   }
 
   @override
