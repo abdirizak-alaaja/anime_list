@@ -2,6 +2,7 @@ import '../../features/favorites/data/favorites_storage.dart';
 import '../../features/favorites/repositories/favorites_repository.dart';
 import '../../features/library/data/library_storage.dart';
 import '../../features/library/repositories/library_repository.dart';
+import '../network/api_health.dart';
 import '../network/jikan_api.dart';
 import '../network/jikan_http_client.dart';
 import '../settings/settings_controller.dart';
@@ -26,10 +27,14 @@ class AppDependencies {
   final JikanHttpClient _httpClient;
   late final JikanApi jikan;
 
+  /// Whether Jikan is currently reachable; drives the offline banner.
+  ApiHealth get apiHealth => _httpClient.health;
+
   void dispose() {
     settings.dispose();
     library.dispose();
     favorites.dispose();
     _httpClient.close();
+    apiHealth.dispose();
   }
 }

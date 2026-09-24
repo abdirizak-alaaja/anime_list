@@ -4,7 +4,9 @@ import '../../features/favorites/screens/favorites_screen.dart';
 import '../../features/home/screens/home_screen.dart';
 import '../../features/library/screens/my_list_screen.dart';
 import '../../features/search/screens/search_screen.dart';
+import '../../shared/widgets/offline_banner.dart';
 import '../constants/app_constants.dart';
+import '../di/app_scope.dart';
 
 /// A top-level tab of the app.
 class ShellDestination {
@@ -74,13 +76,20 @@ class _AppShellState extends State<AppShell> {
 
   @override
   Widget build(BuildContext context) {
-    final body = IndexedStack(
+    final stack = IndexedStack(
       index: _index,
       children: [
         for (var i = 0; i < _destinations.length; i++)
           _visited.contains(i)
               ? Builder(builder: _destinations[i].builder)
               : const SizedBox.shrink(),
+      ],
+    );
+
+    final body = Column(
+      children: [
+        Expanded(child: stack),
+        OfflineBanner(health: AppScope.of(context).apiHealth),
       ],
     );
 

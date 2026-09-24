@@ -1,9 +1,10 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 /// Poster image with a themed placeholder and error fallback.
 ///
-/// Decodes the image at its display size to keep memory use low on
-/// lower-end devices.
+/// Images are cached on disk, and decoded at their display size to keep
+/// memory use low on lower-end devices.
 class AnimePoster extends StatelessWidget {
   const AnimePoster({
     super.key,
@@ -46,30 +47,23 @@ class AnimePoster extends StatelessWidget {
               ? (constraints.maxWidth * dpr).round()
               : null;
 
-          return Image.network(
-            url,
+          // Cached on disk, so posters of saved anime still show offline.
+          return CachedNetworkImage(
+            imageUrl: url,
             fit: fit,
             width: double.infinity,
             height: double.infinity,
-            cacheWidth: width,
-            semanticLabel: semanticLabel,
-            excludeFromSemantics: semanticLabel == null,
-            gaplessPlayback: true,
-            frameBuilder: (context, child, frame, wasSyncLoaded) {
-              if (wasSyncLoaded) return child;
-              return Stack(
-                fit: StackFit.expand,
-                children: [
-                  placeholder,
-                  AnimatedOpacity(
-                    opacity: frame == null ? 0 : 1,
-                    duration: const Duration(milliseconds: 250),
-                    child: child,
+            memCacheWidth: width,
+            fadeInDuration: const Duration(milliseconds: 250),
+            placeholder: (context, url) => placeholder,
+            errorWidget: (context, url, error) => placeholder,
+            imageBuilder: semanticLabel == null
+                ? null
+                : (context, provider) => Image(
+                    image: provider,
+                    fit: fit,
+                    semanticLabel: semanticLabel,
                   ),
-                ],
-              );
-            },
-            errorBuilder: (context, error, stackTrace) => placeholder,
           );
         },
       ),

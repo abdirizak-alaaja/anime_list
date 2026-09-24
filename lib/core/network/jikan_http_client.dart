@@ -7,8 +7,10 @@ import 'package:http/http.dart' as http;
 import '../constants/app_constants.dart';
 import '../errors/app_exception.dart';
 import '../utils/json.dart';
+import 'api_health.dart';
 import 'rate_limiter.dart';
 import 'response_cache.dart';
+import 'saved_response_store.dart';
 
 /// Low-level HTTP access to the Jikan API.
 ///
@@ -21,6 +23,10 @@ import 'response_cache.dart';
 ///    server errors (5xx, which Jikan returns when MyAnimeList is slow), and
 ///    one retry for timeouts and connection failures.
 ///
+/// When a request fails because the device is offline or Jikan is down, the
+/// last saved response for it is returned instead (see
+/// [SavedResponseStore]) and [health] reports the problem.
+///
 /// Failures always surface as [AppException]s.
 class JikanHttpClient {
   JikanHttpClient({
@@ -28,6 +34,8 @@ class JikanHttpClient {
     String baseUrl = AppConstants.jikanBaseUrl,
     RateLimiter? rateLimiter,
     ResponseCache? cache,
+    SavedResponseStore? savedResponses,
+    ApiHealth? health,
     this.timeout = const Duration(seconds: 15),
     this.maxServerRetries = 2,
     this.maxNetworkRetries = 1,
@@ -42,6 +50,8 @@ class JikanHttpClient {
                  : RateLimiter.selfHostedLimits,
            ),
        _cache = cache ?? MemoryResponseCache(),
+       _saved = savedResponses ?? const NoSavedResponses(),
+       health = health ?? ApiHealth(),
        _delay = delay ?? Future<void>.delayed;
 
   static const defaultCacheTtl = Duration(minutes: 10);
@@ -50,7 +60,11 @@ class JikanHttpClient {
   final Uri _baseUri;
   final RateLimiter _rateLimiter;
   final ResponseCache _cache;
+  final SavedResponseStore _saved;
   final Future<void> Function(Duration) _delay;
+
+  /// Reflects whether recent requests reached Jikan successfully.
+  final ApiHealth health;
 
   final Duration timeout;
   final int maxServerRetries;
@@ -75,11 +89,13 @@ class JikanHttpClient {
       if (cached != null) return Future.value(cached);
     }
 
-    return _inFlight[key] ??= _fetch(uri, cacheTtl).whenComplete(() {
-      // Block body on purpose: returning the removed future from this
-      // callback would make the request wait on itself.
-      _inFlight.remove(key);
-    });
+    return _inFlight[key] ??= _fetchWithFallback(uri, cacheTtl).whenComplete(
+      () {
+        // Block body on purpose: returning the removed future from this
+        // callback would make the request wait on itself.
+        _inFlight.remove(key);
+      },
+    );
   }
 
   Uri buildUri(String path, [Map<String, Object?> query = const {}]) {
@@ -95,6 +111,30 @@ class JikanHttpClient {
       pathSegments: segments,
       queryParameters: params.isEmpty ? null : params,
     );
+  }
+
+  /// Fetches from the network; if that fails for a reason that might be
+  /// temporary, falls back to the last saved response for the same request.
+  Future<Json> _fetchWithFallback(Uri uri, Duration cacheTtl) async {
+    final key = uri.toString();
+    try {
+      final json = await _fetch(uri, cacheTtl);
+      health.reportSuccess();
+      unawaited(_saved.write(key, json));
+      return json;
+    } on AppException catch (error) {
+      switch (error) {
+        case NetworkException() || RequestTimeoutException():
+          health.reportOffline();
+        case ServerException() || RateLimitException():
+          health.reportDegraded();
+        default:
+          rethrow; // Not found / unparseable: saved data won't help.
+      }
+      final saved = await _saved.read(key);
+      if (saved == null) rethrow;
+      return saved;
+    }
   }
 
   Future<Json> _fetch(Uri uri, Duration cacheTtl) async {
