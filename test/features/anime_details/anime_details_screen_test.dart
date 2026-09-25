@@ -127,4 +127,28 @@ void main() {
     expect(find.byType(CharacterProfileScreen), findsOneWidget);
     expect(find.text('フリーレン'), findsOneWidget);
   });
+
+  testWidgets('app bar shows the title once the header scrolls away', (
+    tester,
+  ) async {
+    final deps = testDependencies(
+      handler: (uri) => uri.path.endsWith('/full')
+          ? fixture('anime_full.json')
+          : {'data': []},
+    );
+    await tester.pumpWidget(
+      testApp(deps, const AnimeDetailsScreen(malId: 52991)),
+    );
+    await tester.pumpAndSettle();
+
+    final inAppBar = find.descendant(
+      of: find.byType(AppBar),
+      matching: find.text('Sousou no Frieren'),
+    );
+    expect(inAppBar, findsNothing);
+
+    await tester.drag(find.byType(ListView).first, const Offset(0, -400));
+    await tester.pumpAndSettle();
+    expect(inAppBar, findsOneWidget);
+  });
 }
