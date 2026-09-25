@@ -17,7 +17,7 @@ import '../widgets/info_table.dart';
 import '../widgets/media_strip.dart';
 import '../widgets/stats_row.dart';
 import '../widgets/tag_list.dart';
-import '../widgets/trailer_button.dart';
+import '../widgets/trailer_player.dart';
 
 class AnimeDetailsScreen extends StatefulWidget {
   const AnimeDetailsScreen({
@@ -39,6 +39,9 @@ class AnimeDetailsScreen extends StatefulWidget {
 
 class _AnimeDetailsScreenState extends State<AnimeDetailsScreen> {
   late final AnimeDetailsController _controller;
+
+  /// Whether the header has scrolled away, so the app bar turns solid.
+  bool _collapsed = false;
 
   @override
   void initState() {
@@ -63,6 +66,18 @@ class _AnimeDetailsScreenState extends State<AnimeDetailsScreen> {
       await deps.favorites.syncMetadata(anime);
     }
   }
+
+  bool _onScroll(ScrollNotification notification) {
+    // Only the page itself, not the horizontal strips inside it.
+    if (notification.depth == 0 && notification.metrics.axis == Axis.vertical) {
+      final collapsed = notification.metrics.pixels > _collapseOffset;
+      if (collapsed != _collapsed) setState(() => _collapsed = collapsed);
+    }
+    return false;
+  }
+
+  /// Roughly where the header's poster ends.
+  static const _collapseOffset = 180.0;
 
   @override
   void dispose() {
@@ -89,20 +104,37 @@ class _AnimeDetailsScreenState extends State<AnimeDetailsScreen> {
 
         return Scaffold(
           extendBodyBehindAppBar: true,
+          // Stays pinned: transparent over the header, then solid with the
+          // title once the header scrolls away.
           appBar: AppBar(
             backgroundColor: Colors.transparent,
             foregroundColor: Colors.white,
-            flexibleSpace: const _AppBarScrim(),
+            flexibleSpace: _AppBarBackground(solid: _collapsed),
+            // Built only when shown, so the title isn't read or found twice.
+            title: AnimatedSwitcher(
+              duration: _fade,
+              child: _collapsed
+                  ? Text(
+                      anime.title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(color: Colors.white),
+                    )
+                  : const SizedBox.shrink(),
+            ),
             actions: [FavoriteButton(anime: anime, color: Colors.white)],
           ),
-          body: RefreshIndicator(
-            edgeOffset: MediaQuery.paddingOf(context).top + kToolbarHeight,
-            onRefresh: () => _load(forceRefresh: true),
-            child: _DetailsBody(
-              controller: _controller,
-              anime: anime,
-              heroTag: widget.heroTag,
-              onRetry: _load,
+          body: NotificationListener<ScrollNotification>(
+            onNotification: _onScroll,
+            child: RefreshIndicator(
+              edgeOffset: MediaQuery.paddingOf(context).top + kToolbarHeight,
+              onRefresh: () => _load(forceRefresh: true),
+              child: _DetailsBody(
+                controller: _controller,
+                anime: anime,
+                heroTag: widget.heroTag,
+                onRetry: _load,
+              ),
             ),
           ),
         );
@@ -111,20 +143,36 @@ class _AnimeDetailsScreenState extends State<AnimeDetailsScreen> {
   }
 }
 
-/// Keeps app bar icons legible over light posters.
-class _AppBarScrim extends StatelessWidget {
-  const _AppBarScrim();
+const _fade = Duration(milliseconds: 200);
+
+/// A scrim that keeps icons legible over light posters, fading to the
+/// theme's app bar color when [solid].
+class _AppBarBackground extends StatelessWidget {
+  const _AppBarBackground({required this.solid});
+
+  final bool solid;
 
   @override
   Widget build(BuildContext context) {
-    return const DecoratedBox(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [Colors.black54, Colors.transparent],
+    final color = Theme.of(context).appBarTheme.backgroundColor;
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        const DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [Colors.black54, Colors.transparent],
+            ),
+          ),
         ),
-      ),
+        AnimatedOpacity(
+          opacity: solid ? 1 : 0,
+          duration: _fade,
+          child: ColoredBox(color: color ?? Colors.black),
+        ),
+      ],
     );
   }
 }
@@ -187,7 +235,7 @@ class _DetailsBody extends StatelessWidget {
           const SizedBox(height: Insets.md),
           Padding(
             padding: padding,
-            child: TrailerButton(anime: anime),
+            child: TrailerPlayer(anime: anime),
           ),
         ],
         const SectionHeader(title: 'Synopsis'),
@@ -241,8 +289,10 @@ class _DetailsBody extends StatelessWidget {
             title: 'Characters',
             state: controller.characters,
             onRetry: controller.loadCharacters,
-            itemBuilder: (context, character) =>
-                CharacterTile(character: character),
+            itemBuilder: (context, character) => CharacterTile(
+              character: character,
+              onTap: () => AppRouter.openCharacter(context, character),
+            ),
           ),
           MediaStrip(
             title: 'Recommendations',

@@ -101,6 +101,18 @@ abstract final class AppTheme {
         surfaceTintColor: Colors.transparent,
         labelTextStyle: WidgetStatePropertyAll(textTheme.labelMedium),
       ),
+      // Tabs sit on the page surface (not the blue app bar), so in light
+      // mode labels are black rather than the default primary/muted colors.
+      tabBarTheme: TabBarThemeData(
+        labelColor: isLight ? Colors.black : scheme.primary,
+        unselectedLabelColor: isLight ? Colors.black : scheme.onSurfaceVariant,
+        labelStyle: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+        unselectedLabelStyle: textTheme.titleSmall?.copyWith(
+          fontWeight: FontWeight.w500,
+        ),
+        indicatorColor: scheme.primary,
+        dividerColor: scheme.outlineVariant,
+      ),
       navigationRailTheme: NavigationRailThemeData(
         backgroundColor: scheme.surfaceContainerLow,
         indicatorColor: isLight ? AppColors.malBlueTint : AppColors.malBlue,

@@ -91,9 +91,10 @@ class MediaStrip<T> extends StatelessWidget {
 
 /// Character portrait with name and voice actor.
 class CharacterTile extends StatelessWidget {
-  const CharacterTile({super.key, required this.character});
+  const CharacterTile({super.key, required this.character, this.onTap});
 
   final AnimeCharacter character;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -102,6 +103,7 @@ class CharacterTile extends StatelessWidget {
     final subtitle = character.voiceActorName ?? character.role;
 
     return Semantics(
+      button: onTap != null,
       label: [
         character.name,
         if (character.role != null) '${character.role} character',
@@ -109,28 +111,32 @@ class CharacterTile extends StatelessWidget {
           'voiced by ${character.voiceActorName}',
       ].join(', '),
       excludeSemantics: true,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          AspectRatio(
-            aspectRatio: AnimePoster.aspectRatio,
-            child: AnimePoster(imageUrl: character.imageUrl),
-          ),
-          const SizedBox(height: Insets.xs),
-          Text(
-            character.name,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: theme.textTheme.labelMedium,
-          ),
-          if (subtitle != null)
-            Text(
-              subtitle,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.labelSmall?.copyWith(color: muted),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(10),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            AspectRatio(
+              aspectRatio: AnimePoster.aspectRatio,
+              child: AnimePoster(imageUrl: character.imageUrl),
             ),
-        ],
+            const SizedBox(height: Insets.xs),
+            Text(
+              character.name,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.labelMedium,
+            ),
+            if (subtitle != null)
+              Text(
+                subtitle,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.labelSmall?.copyWith(color: muted),
+              ),
+          ],
+        ),
       ),
     );
   }

@@ -1,0 +1,45 @@
+{
+  "data": {
+    "mal_id": 184947,
+    "url": "https://myanimelist.net/character/184947/Frieren",
+    "images": {
+      "jpg": {"image_url": "https://cdn.myanimelist.net/images/characters/7/525105.jpg"},
+      "webp": {"image_url": "https://cdn.myanimelist.net/images/characters/7/525105.webp"}
+    },
+    "name": "Frieren",
+    "name_kanji": "フリーレン",
+    "nicknames": ["Frieren the Slayer"],
+    "favorites": 51234,
+    "about": "Frieren is an elf mage who was part of the party that defeated the Demon King.",
+    "anime": [
+      {
+        "role": "Supporting",
+        "anime": {
+          "mal_id": 56885,
+          "title": "Sousou no Frieren: Mini Anime",
+          "images": {"jpg": {"image_url": "https://cdn.myanimelist.net/images/anime/1/2.jpg"}}
+        }
+      },
+      {
+        "role": "Main",
+        "anime": {
+          "mal_id": 52991,
+          "title": "Sousou no Frieren",
+          "images": {"jpg": {"image_url": "https://cdn.myanimelist.net/images/anime/1015/138006.jpg", "large_image_url": "https://cdn.myanimelist.net/images/anime/1015/138006l.jpg"}}
+        }
+      },
+      {"role": "Main", "anime": {"title": "Missing id"}}
+    ],
+    "manga": [],
+    "voices": [
+      {
+        "language": "English",
+        "person": {"mal_id": 2, "name": "Mallorie Rodak", "images": {"jpg": {"image_url": "https://cdn.myanimelist.net/img/sp/icon/apple-touch-icon-256.png?questionmark"}}}
+      },
+      {
+        "language": "Japanese",
+        "person": {"mal_id": 1, "name": "Tanezaki, Atsumi", "images": {"jpg": {"image_url": "https://cdn.myanimelist.net/images/voiceactors/1/1.jpg"}}}
+      }
+    ]
+  }
+}

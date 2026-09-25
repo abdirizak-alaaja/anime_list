@@ -85,7 +85,7 @@ class _HomeScreenState extends State<HomeScreen> {
         child: CustomScrollView(
           slivers: [
             const SliverAppBar(
-              floating: true,
+              pinned: true,
               title: _AppTitle(),
               actions: [ThemeModeButton()],
             ),

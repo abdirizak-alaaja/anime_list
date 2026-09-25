@@ -1,4 +1,5 @@
 import '../../core/utils/json.dart';
+import 'character_profile.dart';
 
 /// A character appearing in an anime (`/anime/{id}/characters`).
 class AnimeCharacter {
@@ -42,21 +43,11 @@ class AnimeCharacter {
     return AnimeCharacter(
       malId: id,
       name: name,
-      imageUrl: _image(character),
+      imageUrl: characterImage(character),
       role: json.str('role'),
       favorites: json.integer('favorites'),
       voiceActorName: person?.str('name'),
-      voiceActorImageUrl: person == null ? null : _image(person),
+      voiceActorImageUrl: person == null ? null : characterImage(person),
     );
-  }
-
-  static String? _image(Json json) {
-    final images = json.obj('images');
-    final url =
-        images?.obj('jpg')?.str('image_url') ??
-        images?.obj('webp')?.str('image_url');
-    // MyAnimeList's generic "no picture" placeholder isn't worth loading.
-    if (url == null || url.contains('questionmark')) return null;
-    return url;
   }
 }
