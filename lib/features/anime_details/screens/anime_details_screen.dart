@@ -17,7 +17,7 @@ import '../widgets/info_table.dart';
 import '../widgets/media_strip.dart';
 import '../widgets/stats_row.dart';
 import '../widgets/tag_list.dart';
-import '../widgets/trailer_button.dart';
+import '../widgets/trailer_player.dart';
 
 class AnimeDetailsScreen extends StatefulWidget {
   const AnimeDetailsScreen({
@@ -187,7 +187,7 @@ class _DetailsBody extends StatelessWidget {
           const SizedBox(height: Insets.md),
           Padding(
             padding: padding,
-            child: TrailerButton(anime: anime),
+            child: TrailerPlayer(anime: anime),
           ),
         ],
         const SectionHeader(title: 'Synopsis'),
@@ -241,8 +241,10 @@ class _DetailsBody extends StatelessWidget {
             title: 'Characters',
             state: controller.characters,
             onRetry: controller.loadCharacters,
-            itemBuilder: (context, character) =>
-                CharacterTile(character: character),
+            itemBuilder: (context, character) => CharacterTile(
+              character: character,
+              onTap: () => AppRouter.openCharacter(context, character),
+            ),
           ),
           MediaStrip(
             title: 'Recommendations',

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../../features/anime_details/screens/anime_details_screen.dart';
+import '../../features/character/screens/character_profile_screen.dart';
 import '../../shared/models/anime.dart';
+import '../../shared/models/anime_character.dart';
 
 /// Central place for pushing app routes.
 abstract final class AppRouter {
@@ -30,4 +32,17 @@ abstract final class AppRouter {
     Object? heroTag,
   }) =>
       openAnime(context, malId: anime.malId, preview: anime, heroTag: heroTag);
+
+  /// Opens a character's profile, showing [preview] while it loads.
+  static Future<void> openCharacter(
+    BuildContext context,
+    AnimeCharacter preview,
+  ) {
+    return Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) =>
+            CharacterProfileScreen(malId: preview.malId, preview: preview),
+      ),
+    );
+  }
 }

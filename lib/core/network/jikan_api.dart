@@ -3,6 +3,7 @@ import '../../shared/models/anime_character.dart';
 import '../../shared/models/anime_enums.dart';
 import '../../shared/models/anime_query.dart';
 import '../../shared/models/anime_recommendation.dart';
+import '../../shared/models/character_profile.dart';
 import '../../shared/models/named_resource.dart';
 import '../../shared/models/paginated.dart';
 import '../errors/app_exception.dart';
@@ -134,6 +135,22 @@ class JikanApi {
       forceRefresh: forceRefresh,
     );
     return _parseList(json, AnimeRecommendation.fromJson);
+  }
+
+  /// `/characters/{id}/full`
+  Future<CharacterProfile> getCharacterFull(
+    int id, {
+    bool forceRefresh = false,
+  }) async {
+    final json = await _client.get(
+      'characters/$id/full',
+      cacheTtl: _detailsTtl,
+      forceRefresh: forceRefresh,
+    );
+    final data = json.obj('data');
+    final character = data == null ? null : CharacterProfile.fromJson(data);
+    if (character == null) throw const NotFoundException();
+    return character;
   }
 
   /// `/genres/anime` — genres, themes and demographics, sorted by name.

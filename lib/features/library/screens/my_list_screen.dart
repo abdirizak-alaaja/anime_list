@@ -62,17 +62,27 @@ class _MyListScreenState extends State<MyListScreen> {
           ),
           const ThemeModeButton(),
         ],
-        bottom: TabBar(
-          isScrollable: true,
-          tabAlignment: TabAlignment.start,
-          tabs: [
-            for (final status in _tabs)
-              Tab(
-                text: status == null
-                    ? 'All (${all.length})'
-                    : '${status.label} (${library.countFor(status)})',
-              ),
-          ],
+        // Tabs get their own strip so labels stay legible on the blue
+        // light-mode app bar.
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(kTextTabBarHeight),
+          // A Material (not a ColoredBox) so TabBar doesn't whiten its
+          // indicator to contrast with the blue app bar.
+          child: Material(
+            color: Theme.of(context).colorScheme.surface,
+            child: TabBar(
+              isScrollable: true,
+              tabAlignment: TabAlignment.start,
+              tabs: [
+                for (final status in _tabs)
+                  Tab(
+                    text: status == null
+                        ? 'All (${all.length})'
+                        : '${status.label} (${library.countFor(status)})',
+                  ),
+              ],
+            ),
+          ),
         ),
       ),
       body: TabBarView(
