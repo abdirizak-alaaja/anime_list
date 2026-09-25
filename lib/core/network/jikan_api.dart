@@ -99,6 +99,12 @@ class JikanApi {
   Future<Anime> getAnimeFull(int id, {bool forceRefresh = false}) =>
       _animeDetails('anime/$id/full', forceRefresh);
 
+  /// `/random/anime`. Never cached, so each call returns a new entry.
+  ///
+  /// The endpoint has no `sfw` filter; callers should check [Anime.rating].
+  Future<Anime> getRandomAnime() =>
+      _animeDetails('random/anime', true, cacheTtl: Duration.zero);
+
   /// `/anime/{id}/characters`, main characters first.
   Future<List<AnimeCharacter>> getAnimeCharacters(
     int id, {
@@ -160,10 +166,14 @@ class JikanApi {
     return Paginated.fromJson(json, Anime.fromJson, requestedPage: page);
   }
 
-  Future<Anime> _animeDetails(String path, bool forceRefresh) async {
+  Future<Anime> _animeDetails(
+    String path,
+    bool forceRefresh, {
+    Duration cacheTtl = _detailsTtl,
+  }) async {
     final json = await _client.get(
       path,
-      cacheTtl: _detailsTtl,
+      cacheTtl: cacheTtl,
       forceRefresh: forceRefresh,
     );
     final data = json.obj('data');

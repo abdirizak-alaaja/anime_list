@@ -51,6 +51,12 @@ void main() {
     expect(anime.genres, isNotEmpty);
     expect(anime.largeImageUrl, startsWith('https://'));
     expect(anime.synopsis, isNot(contains('MAL Rewrite')));
+    // `youtube_id` is null in the fixture; the id comes from `embed_url`.
+    expect(anime.trailerYoutubeId, 'ZEkwCGJ3o7M');
+    expect(
+      anime.trailerUri.toString(),
+      'https://www.youtube.com/watch?v=ZEkwCGJ3o7M',
+    );
   });
 
   test('tolerates missing and null fields', () async {
@@ -76,6 +82,7 @@ void main() {
     expect(anime.genres, isEmpty);
     expect(anime.airedLabel, isNull);
     expect(anime.duration, isNull);
+    expect(anime.trailerUri, isNull);
   });
 
   test('missing data object is reported as not found', () async {

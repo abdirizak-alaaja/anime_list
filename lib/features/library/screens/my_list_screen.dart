@@ -35,53 +35,58 @@ class _MyListScreenState extends State<MyListScreen> {
       length: _tabs.length,
       child: ListenableBuilder(
         listenable: library,
-        builder: (context, _) => Scaffold(
-          appBar: AppBar(
-            title: const Text('My List'),
-            actions: [
-              PopupMenuButton<LibrarySort>(
-                tooltip: 'Sort',
-                icon: const Icon(Icons.sort_rounded),
-                initialValue: _sort,
-                onSelected: (sort) => setState(() => _sort = sort),
-                itemBuilder: (context) => [
-                  for (final sort in LibrarySort.values)
-                    CheckedPopupMenuItem(
-                      value: sort,
-                      checked: sort == _sort,
-                      child: Text(sort.label),
-                    ),
-                ],
-              ),
-              const ThemeModeButton(),
-            ],
-            bottom: TabBar(
-              isScrollable: true,
-              tabAlignment: TabAlignment.start,
-              tabs: [
-                for (final status in _tabs)
-                  Tab(
-                    text: status == null
-                        ? 'All (${library.entries.length})'
-                        : '${status.label} (${library.countFor(status)})',
-                  ),
-              ],
-            ),
-          ),
-          body: TabBarView(
-            children: [
-              for (final status in _tabs)
-                _StatusList(
-                  library: library,
-                  entries: _sort.apply([
-                    for (final e in library.entries)
-                      if (status == null || e.status == status) e,
-                  ]),
-                  status: status,
+        builder: (context, _) => _buildScaffold(library),
+      ),
+    );
+  }
+
+  Widget _buildScaffold(LibraryRepository library) {
+    final all = library.entries;
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('My List'),
+        actions: [
+          PopupMenuButton<LibrarySort>(
+            tooltip: 'Sort',
+            icon: const Icon(Icons.sort_rounded),
+            initialValue: _sort,
+            onSelected: (sort) => setState(() => _sort = sort),
+            itemBuilder: (context) => [
+              for (final sort in LibrarySort.values)
+                CheckedPopupMenuItem(
+                  value: sort,
+                  checked: sort == _sort,
+                  child: Text(sort.label),
                 ),
             ],
           ),
+          const ThemeModeButton(),
+        ],
+        bottom: TabBar(
+          isScrollable: true,
+          tabAlignment: TabAlignment.start,
+          tabs: [
+            for (final status in _tabs)
+              Tab(
+                text: status == null
+                    ? 'All (${all.length})'
+                    : '${status.label} (${library.countFor(status)})',
+              ),
+          ],
         ),
+      ),
+      body: TabBarView(
+        children: [
+          for (final status in _tabs)
+            _StatusList(
+              library: library,
+              entries: _sort.apply([
+                for (final e in all)
+                  if (status == null || e.status == status) e,
+              ]),
+              status: status,
+            ),
+        ],
       ),
     );
   }

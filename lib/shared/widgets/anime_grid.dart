@@ -106,7 +106,9 @@ class PagedAnimeSliverGrid extends StatelessWidget {
                   itemCount: items.length,
                   itemBuilder: (context, index) {
                     // Prefetch the next page a few rows before the end.
-                    if (index >= items.length - 6) {
+                    if (index >= items.length - 6 &&
+                        controller.hasMore &&
+                        !controller.isLoading) {
                       WidgetsBinding.instance.addPostFrameCallback(
                         (_) => controller.loadMore(),
                       );

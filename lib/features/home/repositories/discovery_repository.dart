@@ -15,11 +15,6 @@ class DiscoveryRepository {
     int page = 1,
     bool forceRefresh = false,
   }) => switch (section) {
-    DiscoverySection.trending => _api.getTopAnime(
-      filter: TopAnimeFilter.airing,
-      page: page,
-      forceRefresh: forceRefresh,
-    ),
     DiscoverySection.thisSeason => _api.getCurrentSeason(
       page: page,
       forceRefresh: forceRefresh,

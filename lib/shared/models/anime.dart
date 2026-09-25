@@ -114,7 +114,7 @@ class Anime {
           jpg?.str('large_image_url') ??
           webp?.str('large_image_url') ??
           jpg?.str('image_url'),
-      trailerYoutubeId: json.obj('trailer')?.str('youtube_id'),
+      trailerYoutubeId: _youtubeId(json.obj('trailer')),
       titleEnglish: json.str('title_english'),
       titleJapanese: json.str('title_japanese'),
       synonyms: json.strList('title_synonyms'),
@@ -154,6 +154,25 @@ class Anime {
     }
     return null;
   }
+
+  /// Self-hosted Jikan often leaves `youtube_id` empty and only fills
+  /// `embed_url` (e.g. `https://www.youtube-nocookie.com/embed/{id}?...`).
+  static String? _youtubeId(Json? trailer) {
+    if (trailer == null) return null;
+    final id = trailer.str('youtube_id');
+    if (id != null && id.isNotEmpty) return id;
+    final embed = Uri.tryParse(trailer.str('embed_url') ?? '');
+    final segments = embed?.pathSegments ?? const <String>[];
+    final index = segments.indexOf('embed');
+    if (index == -1 || index + 1 >= segments.length) return null;
+    final embedded = segments[index + 1];
+    return embedded.isEmpty ? null : embedded;
+  }
+
+  /// YouTube page for the trailer, if there is one.
+  Uri? get trailerUri => trailerYoutubeId == null
+      ? null
+      : Uri.https('www.youtube.com', '/watch', {'v': trailerYoutubeId});
 
   /// Jikan uses "Unknown" as a placeholder in several string fields.
   static String? _clean(String? value) =>

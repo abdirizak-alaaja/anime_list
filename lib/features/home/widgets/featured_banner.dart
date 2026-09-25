@@ -1,24 +1,21 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/constants/app_constants.dart';
-import '../../../core/state/paged_list_controller.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../shared/models/anime.dart';
 import '../../../shared/widgets/anime_poster.dart';
 import '../../../shared/widgets/score_badge.dart';
 import '../../../shared/widgets/shimmer.dart';
+import '../controllers/featured_controller.dart';
 
-/// Swipeable spotlight of the top few entries of a list.
+/// Swipeable spotlight of a few random anime.
 ///
-/// Reuses the data of an existing [PagedListController], so it costs no
-/// extra requests. Hidden if the list fails to load.
+/// Hidden if nothing could be loaded.
 class FeaturedBanner extends StatefulWidget {
   const FeaturedBanner({super.key, required this.controller, this.onTap});
 
-  final PagedListController<Anime> controller;
+  final FeaturedController controller;
   final void Function(Anime anime)? onTap;
-
-  static const itemCount = 5;
 
   @override
   State<FeaturedBanner> createState() => _FeaturedBannerState();
@@ -41,9 +38,9 @@ class _FeaturedBannerState extends State<FeaturedBanner> {
     return ListenableBuilder(
       listenable: widget.controller,
       builder: (context, _) {
-        final items = widget.controller.items
-            .take(FeaturedBanner.itemCount)
-            .toList();
+        final items = widget.controller.items;
+        // Picks can be replaced on refresh; keep the page index valid.
+        if (_page >= items.length) _page = 0;
 
         if (items.isEmpty) {
           if (widget.controller.error != null) return const SizedBox.shrink();

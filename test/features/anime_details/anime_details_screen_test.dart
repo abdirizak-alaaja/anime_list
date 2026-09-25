@@ -19,7 +19,12 @@ void main() {
 
     expect(find.text('Sousou no Frieren'), findsOneWidget);
     expect(find.text('葬送のフリーレン'), findsOneWidget);
-    expect(find.text('Synopsis'), findsOneWidget);
+    expect(find.text('Watch trailer'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('Synopsis'),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
     await tester.scrollUntilVisible(
       find.text('Madhouse'),
       300,
@@ -43,6 +48,7 @@ void main() {
 
     expect(find.text('Bare'), findsOneWidget);
     expect(find.text('No synopsis available.'), findsOneWidget);
+    expect(find.text('Watch trailer'), findsNothing);
     expect(tester.takeException(), isNull);
   });
 

@@ -38,7 +38,8 @@ void main() {
     final app = tester.widget<MaterialApp>(find.byType(MaterialApp));
     expect(app.themeMode, ThemeMode.dark);
     expect(find.byType(NavigationBar), findsOneWidget);
-    expect(find.text('Trending Now'), findsOneWidget);
+    expect(find.text('This Season'), findsOneWidget);
+    expect(find.text('Trending Now'), findsNothing);
     expect(find.text('Test Anime'), findsWidgets);
   });
 

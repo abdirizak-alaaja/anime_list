@@ -6,6 +6,7 @@ import '../../../core/navigation/app_router.dart';
 import '../../../shared/models/anime.dart';
 import '../../../shared/widgets/poster_hero.dart';
 import '../../../shared/widgets/theme_mode_button.dart';
+import '../controllers/featured_controller.dart';
 import '../controllers/home_controller.dart';
 import '../models/discovery_section.dart';
 import '../repositories/discovery_repository.dart';
@@ -23,23 +24,28 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   late final HomeController _controller;
+  late final FeaturedController _featured;
 
   @override
   void initState() {
     super.initState();
-    _controller = HomeController(
-      DiscoveryRepository(AppScope.of(context).jikan),
-    )..loadAll();
+    final jikan = AppScope.of(context).jikan;
+    _controller = HomeController(DiscoveryRepository(jikan))..loadAll();
+    _featured = FeaturedController(jikan)..loadInitial();
   }
 
   @override
   void dispose() {
     _controller.dispose();
+    _featured.dispose();
     super.dispose();
   }
 
   Future<void> _refresh() async {
-    final error = await _controller.refreshAll();
+    final (error, _) = await (
+      _controller.refreshAll(),
+      _featured.refresh(),
+    ).wait;
     if (error != null && mounted) {
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
@@ -84,10 +90,7 @@ class _HomeScreenState extends State<HomeScreen> {
               actions: [ThemeModeButton()],
             ),
             SliverToBoxAdapter(
-              child: FeaturedBanner(
-                controller: _controller[DiscoverySection.trending],
-                onTap: _openAnime,
-              ),
+              child: FeaturedBanner(controller: _featured, onTap: _openAnime),
             ),
             SliverList.list(
               children: [

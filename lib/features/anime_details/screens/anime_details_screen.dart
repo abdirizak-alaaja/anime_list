@@ -17,6 +17,7 @@ import '../widgets/info_table.dart';
 import '../widgets/media_strip.dart';
 import '../widgets/stats_row.dart';
 import '../widgets/tag_list.dart';
+import '../widgets/trailer_button.dart';
 
 class AnimeDetailsScreen extends StatefulWidget {
   const AnimeDetailsScreen({
@@ -182,6 +183,13 @@ class _DetailsBody extends StatelessWidget {
           padding: padding,
           child: StatsRow(anime: anime),
         ),
+        if (anime.trailerUri != null) ...[
+          const SizedBox(height: Insets.md),
+          Padding(
+            padding: padding,
+            child: TrailerButton(anime: anime),
+          ),
+        ],
         const SectionHeader(title: 'Synopsis'),
         Padding(
           padding: padding,
