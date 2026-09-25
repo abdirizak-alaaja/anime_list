@@ -4,6 +4,7 @@ import '../../../core/constants/app_constants.dart';
 import '../../../core/di/app_scope.dart';
 import '../../../core/navigation/app_router.dart';
 import '../../../shared/models/anime.dart';
+import '../../../shared/widgets/about_button.dart';
 import '../../../shared/widgets/poster_hero.dart';
 import '../../../shared/widgets/theme_mode_button.dart';
 import '../controllers/featured_controller.dart';
@@ -87,7 +88,7 @@ class _HomeScreenState extends State<HomeScreen> {
             const SliverAppBar(
               pinned: true,
               title: _AppTitle(),
-              actions: [ThemeModeButton()],
+              actions: [AboutButton(), ThemeModeButton()],
             ),
             SliverToBoxAdapter(
               child: FeaturedBanner(controller: _featured, onTap: _openAnime),
